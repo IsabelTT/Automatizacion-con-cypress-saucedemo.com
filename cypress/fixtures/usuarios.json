@@ -1,0 +1,10 @@
+{
+  "usuario_correcto": {
+    "usuario": "standard_user",
+    "password": "secret_sauce"
+  },
+  "usuario_incorrecto": {
+    "usuario": "locked_out_user",
+    "password": "secret_sauce"
+  }
+}

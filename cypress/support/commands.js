@@ -23,3 +23,13 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+//Creando comando personalizados ( metodos)
+// Cypress.Commands.add('loginSauce', (email, password) => { ... })
+
+
+Cypress.Commands.add('loginSaucedemo', (usuario, password) => {
+  cy.get("#user-name").type(usuario)
+  cy.get("*[data-test='password']").type(password)
+  cy.get("input[name='login-button']").click()
+})

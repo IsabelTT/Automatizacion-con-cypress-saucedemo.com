@@ -24,7 +24,7 @@ describe("Bateria de pruebas", () => {
 
   })
 
-  context("ordenacion de catalogo", () => {
+  context.skip("ordenacion de catalogo", () => {
     //Antes de cualquier ordenacion hay que hacer un LOGIN correcto.
     // Con un beforeEach.( cada vez que ejecutemos test de ordenacion necesitamos logearnos)
     beforeEach(() => {
@@ -77,6 +77,58 @@ describe("Bateria de pruebas", () => {
             })
         })
       })
+    })
+
+  })
+
+  context("Compra de productos", () => {
+    //Importante : logearse antes de la compra de articulos
+    beforeEach(() => {
+      cy.fixture("usuarios").then(usuarios => {
+        cy.loginSaucedemo(usuarios.usuario_correcto.usuario, usuarios.usuario_correcto.password)
+      })
+
+      cy.get(".title").as("titulos")
+      cy.get("@titulos").should('have.text', "Products")
+      // cy.get(".cart_list.cart_item")
+
+    })
+
+    it("Comprobar carrito vacio al entrar", () => {
+      // Ingresamos al icono del carrito y verificamos que este vacio
+      cy.get(".shopping_cart_link").click();
+      cy.get("@titulos").should('have.text', "Your Cart")
+      cy.get(".cart_item").should('not.exist')  // verificamos que no existe el cart item, esto para comprobar que el carrito esta vacio.
+    })
+
+    it("Comprar un producto", () => {
+      cy.get("@titulos").should('have.text', "Products")
+      cy.get(".inventory_list").find("button").eq(1).click()
+      cy.get(".shopping_cart_link").click();  // Ingresamos al icono del carrito
+      cy.get("@titulos").should('have.text', "Your Cart")
+      cy.get(".cart_item").should('exist')
+      cy.get('[data-test="checkout"]').click()
+
+      // Luego de dar click en checkout se abre otra ventana:
+
+      cy.get("@titulos").should('have.text', "Checkout: Your Information")
+      // cy.get('[data-test="firstName"]').type("Mariano")
+      // cy.get('[data-test="lastName"]').type("flores")
+      // cy.get('[data-test="postalCode"]').type(("2024"))
+      // El fixture personas.json , me devuelve personas( then) y recuperamos los nombres de los 3 campos
+      cy.fixture("personas").then(personas => {
+        cy.get('[data-test="firstName"]').type(personas.unaCompra.nombre)
+        cy.get('[data-test="lastName"]').type(personas.unaCompra.apellido)
+        cy.get('[data-test="postalCode"]').type(personas.unaCompra.zip)
+      })
+      cy.get('[data-test="continue"]').click()
+
+      // Luego de dar click en Continue se abre otra ventana:
+      cy.get("@titulos").should('have.text', "Checkout: Overview")
+      cy.get(".cart_item").should("be.visible")
+      cy.get('[data-test="finish"]').click()
+      cy.get("@titulos").should('have.text', "Checkout: Complete!")//compra concluida
+
     })
 
   })

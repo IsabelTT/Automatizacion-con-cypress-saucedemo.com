@@ -124,6 +124,7 @@ describe("Bateria de pruebas", () => {
       cy.get('[data-test="continue"]').click()
 
       // Luego de dar click en Continue se abre otra ventana:
+      // Verificamos que el titulo de esta ventana coincida con el texto
       cy.get("@titulos").should('have.text', "Checkout: Overview")
       cy.get(".cart_item").should("be.visible")
       cy.get('[data-test="finish"]').click()

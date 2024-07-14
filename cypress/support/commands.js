@@ -33,3 +33,25 @@ Cypress.Commands.add('loginSaucedemo', (usuario, password) => {
   cy.get("*[data-test='password']").type(password)
   cy.get("input[name='login-button']").click()
 })
+
+
+Cypress.Commands.add('checkout', (datos) => { // parametro datos sera compraTodo o compraUno de json, dependiendo del dato que ingrese en parametro
+  // En la compra este boton es comun, por eso se crea un comands. Luego de dar click al boton solicita los datos y finalmente confirma con el mensaje checkout complete
+  cy.get('[data-test="checkout"]').click()
+  cy.get("@titulos").should('have.text', "Checkout: Your Information")
+
+  cy.fixture(datos).then(numPersonas => {
+    cy.get('[data-test="firstName"]').type(numPersonas.nombre)
+    cy.get('[data-test="lastName"]').type(numPersonas.apellido)
+    cy.get('[data-test="postalCode"]').type(numPersonas.zip)
+  })
+  cy.get('[data-test="continue"]').click()
+
+  cy.get("@titulos").should('have.text', "Checkout: Overview")
+  cy.get(".cart_item").should("be.visible")
+  cy.get('[data-test="finish"]').click()
+  cy.get("@titulos").should('have.text', "Checkout: Complete!")//
+
+
+
+})

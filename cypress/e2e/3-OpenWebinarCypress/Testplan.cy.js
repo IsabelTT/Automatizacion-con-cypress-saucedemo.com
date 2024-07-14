@@ -4,7 +4,7 @@ describe("Bateria de pruebas", () => {
     cy.visit("https://www.saucedemo.com")
   })
 
-  context.skip("Login", () => {
+  context("Login", () => {
 
     it("Login correcto", () => {
       cy.fixture("usuarios").then(usuarios => {
@@ -82,6 +82,9 @@ describe("Bateria de pruebas", () => {
   })
 
   context("Compra de productos", () => {
+    //Creamos una variable como contador, y lo llamamos e igualamos a cero.
+    let productosAgregados;
+
     //Importante : logearse antes de la compra de articulos
     beforeEach(() => {
       cy.fixture("usuarios").then(usuarios => {
@@ -90,7 +93,8 @@ describe("Bateria de pruebas", () => {
 
       cy.get(".title").as("titulos")
       cy.get("@titulos").should('have.text', "Products")
-      // cy.get(".cart_list.cart_item")
+
+      productosAgregados = 0;   // Cada vez que reiniciamos el test, la variable la igualamos a cero
 
     })
 
@@ -103,35 +107,51 @@ describe("Bateria de pruebas", () => {
 
     it("Comprar un producto", () => {
       cy.get("@titulos").should('have.text', "Products")
-      cy.get(".inventory_list").find("button").eq(1).click()
+      cy.get(".inventory_list").find("button").eq(1).click()//indice 1, es decir el segundo
       cy.get(".shopping_cart_link").click();  // Ingresamos al icono del carrito
-      cy.get("@titulos").should('have.text', "Your Cart")
+      cy.get("@titulos").should('have.text', "Your Cart")//Verificamos que la pantalla tenga el texto your cart
       cy.get(".cart_item").should('exist')
-      cy.get('[data-test="checkout"]').click()
 
-      // Luego de dar click en checkout se abre otra ventana:
-
-      cy.get("@titulos").should('have.text', "Checkout: Your Information")
-      // cy.get('[data-test="firstName"]').type("Mariano")
-      // cy.get('[data-test="lastName"]').type("flores")
-      // cy.get('[data-test="postalCode"]').type(("2024"))
-      // El fixture personas.json , me devuelve personas( then) y recuperamos los nombres de los 3 campos
-      cy.fixture("personas").then(personas => {
-        cy.get('[data-test="firstName"]').type(personas.unaCompra.nombre)
-        cy.get('[data-test="lastName"]').type(personas.unaCompra.apellido)
-        cy.get('[data-test="postalCode"]').type(personas.unaCompra.zip)
-      })
-      cy.get('[data-test="continue"]').click()
-
-      // Luego de dar click en Continue se abre otra ventana:
-      // Verificamos que el titulo de esta ventana coincida con el texto
-      cy.get("@titulos").should('have.text', "Checkout: Overview")
-      cy.get(".cart_item").should("be.visible")
-      cy.get('[data-test="finish"]').click()
-      cy.get("@titulos").should('have.text', "Checkout: Complete!")//compra concluida
+      //Commands: 
+      cy.checkout("compraUno")
 
     })
 
+    it("Comprar todos los elementos", () => {
+      cy.get(".inventory_list button").each(($button, index, $listado) => {
+        cy.wrap($button).click();//Click a c/u de los elementos
+        productosAgregados++; // se agrega 1 el contador por cada click ( en toda la iteracion se agregaran los 6 productos)
+
+      })
+      cy.get(".shopping_cart_link").click();  // Ingresamos al icono del carrito
+      cy.get("@titulos").should('have.text', "Your Cart")//
+
+      cy.get(".cart_list .cart_item").then($elementos => {
+        expect($elementos).to.length(productosAgregados)
+      })
+
+      // Commands:
+      cy.checkout("compraTodo")
+
+
+      //Checkout
+      // cy.get('[data-test="checkout"]').click()
+      // cy.get("@titulos").should('have.text', "Checkout: Your Information")
+      // cy.fixture("personas").then(personas => {
+      //   cy.get('[data-test="firstName"]').type(personas.unaCompra.nombre)
+      //   cy.get('[data-test="lastName"]').type(personas.unaCompra.apellido)
+      //   cy.get('[data-test="postalCode"]').type(personas.unaCompra.zip)
+      // })
+      // cy.get('[data-test="continue"]').click()
+
+      // // Luego de dar click en Continue se abre otra ventana:
+      // //  Verificamos que el titulo de esta ventana coincida con el texto
+      // cy.get("@titulos").should('have.text', "Checkout: Overview")
+      // cy.get(".cart_item").should("be.visible")
+      // cy.get('[data-test="finish"]').click()
+      // cy.get("@titulos").should('have.text', "Checkout: Complete!")//
+
+    })
   })
 
 })
